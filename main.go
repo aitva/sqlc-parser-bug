@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	sqlcdb "github.com/aitva/sqlc-parser-bug/db"
 	_ "github.com/lib/pq"
 )
 
@@ -25,7 +26,7 @@ func main() {
 	}
 
 	err = runInTx(db, func(tx *sql.Tx) error {
-		if flags.MigrateDrop {
+		if flags.MigrateDown {
 			err := migrateDrop(tx, info.User)
 			if err != nil {
 				return fmt.Errorf("fail to drop database: %v", err)
@@ -36,6 +37,22 @@ func main() {
 			err := migrateUp(tx)
 			if err != nil {
 				return fmt.Errorf("fail to migrate up: %v", err)
+			}
+		}
+
+		queries := sqlcdb.New(tx)
+
+		if flags.Create {
+			err := createMessage(queries)
+			if err != nil {
+				return fmt.Errorf("fail to create message: %v", err)
+			}
+		}
+
+		if flags.List {
+			err := listMessages(queries)
+			if err != nil {
+				return fmt.Errorf("fail to list messages: %v", err)
 			}
 		}
 
@@ -50,13 +67,17 @@ func main() {
 
 type flags struct {
 	MigrateUp   bool
-	MigrateDrop bool
+	MigrateDown bool
+	List        bool
+	Create      bool
 }
 
 func loadFlags() *flags {
 	flags := &flags{}
 	flag.BoolVar(&flags.MigrateUp, "up", false, "run migration up")
-	flag.BoolVar(&flags.MigrateDrop, "drop", false, "drop the database")
+	flag.BoolVar(&flags.MigrateDown, "down", false, "run migration down")
+	flag.BoolVar(&flags.List, "list", false, "run the list query")
+	flag.BoolVar(&flags.Create, "create", false, "run the create query")
 	flag.Parse()
 	return flags
 }

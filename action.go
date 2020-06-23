@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/aitva/sqlc-parser-bug/db"
+	"github.com/google/uuid"
 )
 
 const migrationFolder = "./schema"
@@ -36,6 +40,26 @@ func migrateDrop(tx *sql.Tx, dbuser string) error {
 	_, err := tx.Exec("DROP OWNED BY " + dbuser)
 	if err != nil {
 		return fmt.Errorf("exec: %v", err)
+	}
+	return nil
+}
+
+func createMessage(q *db.Queries) error {
+	externalID, _ := uuid.NewRandom()
+	_, err := q.CreateMessage(context.Background(), db.CreateMessageParams{
+		Content:    "Hello sqlc!",
+		ExternalID: externalID,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func listMessages(q *db.Queries) error {
+	_, err := q.ListMessages(context.Background())
+	if err != nil {
+		return err
 	}
 	return nil
 }
