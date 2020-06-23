@@ -1,6 +1,6 @@
 # sqlc-parser-bug
 
-This repository reproduce a problem I have seen with the new
+This repository reproduce a problem with the new
 [sqlc](github.com/kyleconroy/sqlc) parser.
 
 The folder `schema` contains two migrations:
