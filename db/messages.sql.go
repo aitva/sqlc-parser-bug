@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 const createMessage = `-- name: CreateMessage :one
@@ -19,17 +20,17 @@ INSERT INTO messages (
 
 type CreateMessageParams struct {
 	Content    string
-	ExternalID uuid.UUID
+	ExternalID []uuid.UUID
 }
 
 func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) (Message, error) {
-	row := q.db.QueryRowContext(ctx, createMessage, arg.Content, arg.ExternalID)
+	row := q.db.QueryRowContext(ctx, createMessage, arg.Content, pq.Array(arg.ExternalID))
 	var i Message
 	err := row.Scan(
 		&i.ID,
 		&i.CreatedAt,
 		&i.Content,
-		&i.ExternalID,
+		pq.Array(&i.ExternalID),
 	)
 	return i, err
 }
@@ -47,7 +48,7 @@ func (q *Queries) GetMessage(ctx context.Context, id uuid.UUID) (Message, error)
 		&i.ID,
 		&i.CreatedAt,
 		&i.Content,
-		&i.ExternalID,
+		pq.Array(&i.ExternalID),
 	)
 	return i, err
 }
@@ -71,7 +72,7 @@ func (q *Queries) ListMessages(ctx context.Context) ([]Message, error) {
 			&i.ID,
 			&i.CreatedAt,
 			&i.Content,
-			&i.ExternalID,
+			pq.Array(&i.ExternalID),
 		); err != nil {
 			return nil, err
 		}
@@ -95,10 +96,10 @@ WHERE id = $1
 type UpdateMessageParams struct {
 	ID         uuid.UUID
 	Content    string
-	ExternalID uuid.UUID
+	ExternalID []uuid.UUID
 }
 
 func (q *Queries) UpdateMessage(ctx context.Context, arg UpdateMessageParams) error {
-	_, err := q.db.ExecContext(ctx, updateMessage, arg.ID, arg.Content, arg.ExternalID)
+	_, err := q.db.ExecContext(ctx, updateMessage, arg.ID, arg.Content, pq.Array(arg.ExternalID))
 	return err
 }

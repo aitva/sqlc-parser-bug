@@ -8,9 +8,14 @@ import (
 	"github.com/google/uuid"
 )
 
+type Counter struct {
+	ID    uuid.UUID
+	Value []int64
+}
+
 type Message struct {
 	ID         uuid.UUID
 	CreatedAt  time.Time
 	Content    string
-	ExternalID uuid.UUID
+	ExternalID []uuid.UUID
 }

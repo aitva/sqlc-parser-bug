@@ -48,7 +48,7 @@ func createMessage(q *db.Queries) error {
 	externalID, _ := uuid.NewRandom()
 	_, err := q.CreateMessage(context.Background(), db.CreateMessageParams{
 		Content:    "Hello sqlc!",
-		ExternalID: externalID,
+		ExternalID: []uuid.UUID{externalID},
 	})
 	if err != nil {
 		return err
@@ -56,8 +56,8 @@ func createMessage(q *db.Queries) error {
 	return nil
 }
 
-func listMessages(q *db.Queries) error {
-	_, err := q.ListMessages(context.Background())
+func createCounter(q *db.Queries) error {
+	_, err := q.CreateCounter(context.Background(), []int64{1})
 	if err != nil {
 		return err
 	}

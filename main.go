@@ -47,12 +47,10 @@ func main() {
 			if err != nil {
 				return fmt.Errorf("fail to create message: %v", err)
 			}
-		}
 
-		if flags.List {
-			err := listMessages(queries)
+			err = createCounter(queries)
 			if err != nil {
-				return fmt.Errorf("fail to list messages: %v", err)
+				return fmt.Errorf("fail to create counter: %v", err)
 			}
 		}
 
@@ -76,8 +74,7 @@ func loadFlags() *flags {
 	flags := &flags{}
 	flag.BoolVar(&flags.MigrateUp, "up", false, "run migration up")
 	flag.BoolVar(&flags.MigrateDown, "down", false, "run migration down")
-	flag.BoolVar(&flags.List, "list", false, "run the list query")
-	flag.BoolVar(&flags.Create, "create", false, "run the create query")
+	flag.BoolVar(&flags.Create, "create", false, "run create queries")
 	flag.Parse()
 	return flags
 }
